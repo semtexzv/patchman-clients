@@ -1,0 +1,2122 @@
+openapi: 3.0.0
+info:
+  description: REST interface for the Insights Platform Host Inventory application.
+  title: Insights Host Inventory REST Interface
+  version: 1.0.0
+servers:
+- url: /api/inventory/v1
+paths:
+  /hosts:
+    get:
+      description: Read the entire list of all hosts available to the account.
+      operationId: api.host.get_host_list
+      parameters:
+      - description: A part of a searched host’s display name.
+        explode: true
+        in: query
+        name: display_name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by a host's FQDN
+        explode: true
+        in: query
+        name: fqdn
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Search for a host by display_name, fqdn, id
+        explode: true
+        in: query
+        name: hostname_or_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Search for a host by insights_id
+        explode: true
+        in: query
+        name: insights_id
+        required: false
+        schema:
+          format: uuid
+          type: string
+        style: form
+      - description: search for a host by the tags on the system
+        explode: true
+        in: query
+        name: tags
+        required: false
+        schema:
+          items:
+            pattern: ^[\w.\-%~]+\/[\w.\-%~]+=[\w.\-%~]+$|^[\w.\-%~]+\/[[\w.\-%~]+$
+            type: string
+          type: array
+        style: form
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: A number of items to return per page.
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: A page number of the items to return.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - description: Ordering field name
+        explode: true
+        in: query
+        name: order_by
+        required: false
+        schema:
+          enum:
+          - display_name
+          - updated
+          type: string
+        style: form
+      - description: Direction of the ordering, defaults to ASC for display_name and
+          to DESC for updated
+        explode: true
+        in: query
+        name: order_how
+        required: false
+        schema:
+          enum:
+          - ASC
+          - DESC
+          type: string
+        style: form
+      - description: 'Culling states of the hosts. Default: fresh,stale,unknown'
+        explode: true
+        in: query
+        name: staleness
+        required: false
+        schema:
+          default:
+          - fresh
+          - stale
+          - unknown
+          items:
+            enum:
+            - fresh
+            - stale
+            - stale_warning
+            - unknown
+            type: string
+          type: array
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostQueryOutput'
+          description: Successfully read the hosts list.
+      security:
+      - ApiKeyAuth: []
+      summary: Read the entire list of hosts
+      tags:
+      - hosts
+    post:
+      description: Create a new host and add it to the host list or update an existing
+        hosts. A host is updated if there is already one with the same canonicals
+        facts and belonging to the same account.
+      operationId: api.host.add_host_list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/CreateHostIn'
+              type: array
+              x-body-name: host_list
+        description: A list of host objects to be added to the host list
+        required: true
+      responses:
+        207:
+          content:
+            application/json:
+              examples:
+                create:
+                  value:
+                    host: Host details
+                    status: 201
+                error:
+                  value:
+                    detail: Could not process request
+                    host: Input host data
+                    status: 400
+                    title: Invalid Request
+                update:
+                  value:
+                    host: Host details
+                    status: 200
+              schema:
+                $ref: '#/components/schemas/BulkHostOut'
+          description: Successfully created a host.
+        400:
+          description: Invalid request.
+      security:
+      - ApiKeyAuth: []
+      - BearerAuth: []
+      summary: Create/update multiple host and add them to the host list
+      tags:
+      - hosts
+  /hosts/{host_id_list}:
+    delete:
+      description: Delete hosts by IDs
+      operationId: api.host.delete_by_id
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        200:
+          description: Successfully deleted hosts.
+        400:
+          description: Invalid request.
+        404:
+          description: Host not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Delete hosts by IDs
+      tags:
+      - hosts
+    get:
+      description: Find one or more hosts by their ID.
+      operationId: api.host.get_host_by_id
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: A number of items to return per page.
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: A page number of the items to return.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - description: Ordering field name
+        explode: true
+        in: query
+        name: order_by
+        required: false
+        schema:
+          enum:
+          - display_name
+          - updated
+          type: string
+        style: form
+      - description: Direction of the ordering, defaults to ASC for display_name and
+          to DESC for updated
+        explode: true
+        in: query
+        name: order_how
+        required: false
+        schema:
+          enum:
+          - ASC
+          - DESC
+          type: string
+        style: form
+      - description: 'Culling states of the hosts. Default: fresh,stale,unknown'
+        explode: true
+        in: query
+        name: staleness
+        required: false
+        schema:
+          default:
+          - fresh
+          - stale
+          - unknown
+          items:
+            enum:
+            - fresh
+            - stale
+            - stale_warning
+            - unknown
+            type: string
+          type: array
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostQueryOutput'
+          description: Successfully searched for hosts.
+        400:
+          description: Invalid request.
+        404:
+          description: Host not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Find hosts by their IDs
+      tags:
+      - hosts
+    patch:
+      description: Update a host
+      operationId: api.host.patch_by_id
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchHostIn'
+        description: A group of fields to be updated on the host
+        required: true
+      responses:
+        200:
+          description: Successfully updated the host.
+        400:
+          description: Invalid request.
+        404:
+          description: Host not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Update a host
+      tags:
+      - hosts
+  /hosts/{host_id_list}/facts/{namespace}:
+    patch:
+      description: Merge one or multiple hosts facts under a namespace.
+      operationId: api.host.merge_facts
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: A namespace of the merged facts.
+        explode: false
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Facts'
+        description: A dictionary with the new facts to merge with the original ones.
+        required: true
+      responses:
+        200:
+          description: Successfully merged facts.
+        400:
+          description: Invalid request.
+        404:
+          description: Host or namespace not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Merge facts under a namespace
+      tags:
+      - hosts
+    put:
+      description: Replace facts under a namespace
+      operationId: api.host.replace_facts
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: A namespace of the merged facts.
+        explode: false
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Facts'
+        description: A dictionary with the new facts to replace the original ones.
+        required: true
+      responses:
+        200:
+          description: Successfully replaced facts.
+        400:
+          description: Invalid request.
+        404:
+          description: Host or namespace not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Replace facts under a namespace
+      tags:
+      - hosts
+  /hosts/{host_id_list}/system_profile:
+    get:
+      description: Find one or more hosts by their ID and return the id and system
+        profile
+      operationId: api.host.get_host_system_profile_by_id
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: A number of items to return per page.
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: A page number of the items to return.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - description: Ordering field name
+        explode: true
+        in: query
+        name: order_by
+        required: false
+        schema:
+          enum:
+          - display_name
+          - updated
+          type: string
+        style: form
+      - description: Direction of the ordering, defaults to ASC for display_name and
+          to DESC for updated
+        explode: true
+        in: query
+        name: order_how
+        required: false
+        schema:
+          enum:
+          - ASC
+          - DESC
+          type: string
+        style: form
+      - description: Filter by branch_id
+        explode: true
+        in: query
+        name: branch_id
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemProfileByHostOut'
+          description: Successfully searched for hosts.
+        400:
+          description: Invalid request.
+        404:
+          description: Host not found.
+      security:
+      - ApiKeyAuth: []
+      summary: Return one or more hosts system profile
+      tags:
+      - hosts
+  /hosts/{host_id_list}/tags:
+    get:
+      description: Get the tags on a host
+      operationId: api.host.get_host_tags
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: A number of items to return per page.
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: A page number of the items to return.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - description: Ordering field name
+        explode: true
+        in: query
+        name: order_by
+        required: false
+        schema:
+          enum:
+          - display_name
+          - updated
+          type: string
+        style: form
+      - description: Direction of the ordering, defaults to ASC for display_name and
+          to DESC for updated
+        explode: true
+        in: query
+        name: order_how
+        required: false
+        schema:
+          enum:
+          - ASC
+          - DESC
+          type: string
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagsOut'
+          description: Successfully found tags.
+        400:
+          description: Invalid request.
+      security:
+      - ApiKeyAuth: []
+      summary: Get the tags on a host
+      tags:
+      - hosts
+  /hosts/{host_id_list}/tags/count:
+    get:
+      description: Get the number of tags on a host
+      operationId: api.host.get_host_tag_count
+      parameters:
+      - description: A comma separated list of host IDs.
+        explode: false
+        in: path
+        name: host_id_list
+        required: true
+        schema:
+          items:
+            format: uuid
+            type: string
+          type: array
+        style: simple
+      - description: A number of items to return per page.
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: A page number of the items to return.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - description: Ordering field name
+        explode: true
+        in: query
+        name: order_by
+        required: false
+        schema:
+          enum:
+          - display_name
+          - updated
+          type: string
+        style: form
+      - description: Direction of the ordering, defaults to ASC for display_name and
+          to DESC for updated
+        explode: true
+        in: query
+        name: order_how
+        required: false
+        schema:
+          enum:
+          - ASC
+          - DESC
+          type: string
+        style: form
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagCountOut'
+          description: Successfully found tag count.
+        400:
+          description: Invalid request.
+      security:
+      - ApiKeyAuth: []
+      summary: Get the number of tags on a host
+      tags:
+      - hosts
+components:
+  parameters:
+    branchId:
+      description: Filter by branch_id
+      explode: true
+      in: query
+      name: branch_id
+      required: false
+      schema:
+        type: string
+      style: form
+    factsNamespace:
+      description: A namespace of the merged facts.
+      explode: false
+      in: path
+      name: namespace
+      required: true
+      schema:
+        type: string
+      style: simple
+    hostIdList:
+      description: A comma separated list of host IDs.
+      explode: false
+      in: path
+      name: host_id_list
+      required: true
+      schema:
+        items:
+          format: uuid
+          type: string
+        type: array
+      style: simple
+    orderByParam:
+      description: Ordering field name
+      explode: true
+      in: query
+      name: order_by
+      required: false
+      schema:
+        enum:
+        - display_name
+        - updated
+        type: string
+      style: form
+    orderHowParam:
+      description: Direction of the ordering, defaults to ASC for display_name and
+        to DESC for updated
+      explode: true
+      in: query
+      name: order_how
+      required: false
+      schema:
+        enum:
+        - ASC
+        - DESC
+        type: string
+      style: form
+    pageParam:
+      description: A page number of the items to return.
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        default: 1
+        minimum: 1
+        type: integer
+      style: form
+    perPageParam:
+      description: A number of items to return per page.
+      explode: true
+      in: query
+      name: per_page
+      required: false
+      schema:
+        default: 50
+        maximum: 100
+        minimum: 1
+        type: integer
+      style: form
+    stalenessParam:
+      description: 'Culling states of the hosts. Default: fresh,stale,unknown'
+      explode: true
+      in: query
+      name: staleness
+      required: false
+      schema:
+        default:
+        - fresh
+        - stale
+        - unknown
+        items:
+          enum:
+          - fresh
+          - stale
+          - stale_warning
+          - unknown
+          type: string
+        type: array
+      style: form
+  schemas:
+    BulkHostOut:
+      example:
+        total: 1
+        data:
+        - host:
+            fqdn: my.host.example.com
+            satellite_id: 3f01b55457674041b75e41829bcee1dc
+            created: 2000-01-23T04:56:07.000+00:00
+            ip_addresses:
+            - 10.10.0.1
+            - 10.0.0.2
+            external_id: i-05d2313e6b9a42b16
+            reporter: reporter
+            display_name: host1.mydomain.com
+            facts:
+            - namespace: namespace
+              facts:
+                fact1: value1
+                fact2: value2
+            - namespace: namespace
+              facts:
+                fact1: value1
+                fact2: value2
+            tags:
+            - namespace: namespace
+              value: value
+              key: key
+            - namespace: namespace
+              value: value
+              key: key
+            subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
+            ansible_host: host1.mydomain.com
+            culled_timestamp: 2000-01-23T04:56:07.000+00:00
+            insights_id: 3f01b55457674041b75e41829bcee1dc
+            stale_warning_timestamp: 2000-01-23T04:56:07.000+00:00
+            id: 3f01b55457674041b75e41829bcee1dc
+            stale_timestamp: 2000-01-23T04:56:07.000+00:00
+            updated: 2000-01-23T04:56:07.000+00:00
+            account: "000102"
+            mac_addresses:
+            - c2:00:d0:c8:61:01
+            bios_uuid: 3f01b55457674041b75e41829bcee1dc
+            rhel_machine_id: 3f01b55457674041b75e41829bcee1dc
+          detail: detail
+          title: title
+          status: 0
+        - host:
+            fqdn: my.host.example.com
+            satellite_id: 3f01b55457674041b75e41829bcee1dc
+            created: 2000-01-23T04:56:07.000+00:00
+            ip_addresses:
+            - 10.10.0.1
+            - 10.0.0.2
+            external_id: i-05d2313e6b9a42b16
+            reporter: reporter
+            display_name: host1.mydomain.com
+            facts:
+            - namespace: namespace
+              facts:
+                fact1: value1
+                fact2: value2
+            - namespace: namespace
+              facts:
+                fact1: value1
+                fact2: value2
+            tags:
+            - namespace: namespace
+              value: value
+              key: key
+            - namespace: namespace
+              value: value
+              key: key
+            subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
+            ansible_host: host1.mydomain.com
+            culled_timestamp: 2000-01-23T04:56:07.000+00:00
+            insights_id: 3f01b55457674041b75e41829bcee1dc
+            stale_warning_timestamp: 2000-01-23T04:56:07.000+00:00
+            id: 3f01b55457674041b75e41829bcee1dc
+            stale_timestamp: 2000-01-23T04:56:07.000+00:00
+            updated: 2000-01-23T04:56:07.000+00:00
+            account: "000102"
+            mac_addresses:
+            - c2:00:d0:c8:61:01
+            bios_uuid: 3f01b55457674041b75e41829bcee1dc
+            rhel_machine_id: 3f01b55457674041b75e41829bcee1dc
+          detail: detail
+          title: title
+          status: 0
+        errors: 6
+      properties:
+        data:
+          description: List of hosts that were created, updated or failed to be processed.
+          items:
+            $ref: '#/components/schemas/BulkHostOutDetails'
+          type: array
+        errors:
+          description: Number of items in the "data" list that contain errors.
+          type: integer
+        total:
+          description: Total number of items in the "data" list.
+          type: integer
+      type: object
+    BulkHostOutDetails:
+      example:
+        host:
+          fqdn: my.host.example.com
+          satellite_id: 3f01b55457674041b75e41829bcee1dc
+          created: 2000-01-23T04:56:07.000+00:00
+          ip_addresses:
+          - 10.10.0.1
+          - 10.0.0.2
+          external_id: i-05d2313e6b9a42b16
+          reporter: reporter
+          display_name: host1.mydomain.com
+          facts:
+          - namespace: namespace
+            facts:
+              fact1: value1
+              fact2: value2
+          - namespace: namespace
+            facts:
+              fact1: value1
+              fact2: value2
+          tags:
+          - namespace: namespace
+            value: value
+            key: key
+          - namespace: namespace
+            value: value
+            key: key
+          subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
+          ansible_host: host1.mydomain.com
+          culled_timestamp: 2000-01-23T04:56:07.000+00:00
+          insights_id: 3f01b55457674041b75e41829bcee1dc
+          stale_warning_timestamp: 2000-01-23T04:56:07.000+00:00
+          id: 3f01b55457674041b75e41829bcee1dc
+          stale_timestamp: 2000-01-23T04:56:07.000+00:00
+          updated: 2000-01-23T04:56:07.000+00:00
+          account: "000102"
+          mac_addresses:
+          - c2:00:d0:c8:61:01
+          bios_uuid: 3f01b55457674041b75e41829bcee1dc
+          rhel_machine_id: 3f01b55457674041b75e41829bcee1dc
+        detail: detail
+        title: title
+        status: 0
+      properties:
+        detail:
+          description: Details about why a host failed to be created or updated.
+          type: string
+        host:
+          $ref: '#/components/schemas/CreateHostOut'
+        status:
+          description: HTTP status code of the results of the host create/update process
+          type: integer
+        title:
+          description: Short description of why a host failed to be created or updated.
+          type: string
+      type: object
+    CreateHostIn:
+      description: Data of a single host belonging to an account. Represents the hosts
+        without its Inventory metadata.
+      example:
+        system_profile:
+          insights_egg_version: insights_egg_version
+          yum_repos:
+          - gpgcheck: true
+            baseurl: https://openapi-generator.tech
+            name: name
+            enabled: true
+          - gpgcheck: true
+            baseurl: https://openapi-generator.tech
+            name: name
+            enabled: true
+          installed_products:
+          - name: name
+            id: "71"
+            status: Subscribed
+          - name: name
+            id: "71"
+            status: Subscribed
+          os_release: os_release
+          infrastructure_type: infrastructure_type
+          installed_packages:
+          - 0:krb5-libs-1.16.1-23.fc29.i686
+          - 0:krb5-libs-1.16.1-23.fc29.i686
+          cores_per_socket: 0
+          installed_services:
+          - installed_services
+          - installed_services
+          bios_vendor: bios_vendor
+          number_of_cpus: 1
+          insights_client_version: insights_client_version
+          kernel_modules:
+          - kernel_modules
+          - kernel_modules
+          subscription_status: subscription_status
+          system_memory_bytes: 5
+          katello_agent_running: true
+          enabled_services:
+          - enabled_services
+          - enabled_services
+          last_boot_time: 2000-01-23T04:56:07.000+00:00
+          number_of_sockets: 5
+          running_processes:
+          - running_processes
+          - running_processes
+          bios_release_date: bios_release_date
+          disk_devices:
+          - mount_point: /mnt/remote_nfs_shares
+            options: '{"ro":true,"uid":"0"}'
+            label: label
+            type: ext3
+            device: /dev/fdd0
+          - mount_point: /mnt/remote_nfs_shares
+            options: '{"ro":true,"uid":"0"}'
+            label: label
+            type: ext3
+            device: /dev/fdd0
+          cloud_provider: cloud_provider
+          bios_version: bios_version
+          os_kernel_version: os_kernel_version
+          cpu_flags:
+          - cpu_flags
+          - cpu_flags
+          network_interfaces:
+          - ipv6_addresses:
+            - ipv6_addresses
+            - ipv6_addresses
+            mac_address: 00:00:00:00:00:00
+            name: eth0
+            ipv4_addresses:
+            - ipv4_addresses
+            - ipv4_addresses
+            state: UP
+            type: ether
+            mtu: 6
+          - ipv6_addresses:
+            - ipv6_addresses
+            - ipv6_addresses
+            mac_address: 00:00:00:00:00:00
+            name: eth0
+            ipv4_addresses:
+            - ipv4_addresses
+            - ipv4_addresses
+            state: UP
+            type: ether
+            mtu: 6
+          subscription_auto_attach: subscription_auto_attach
+          arch: arch
+          infrastructure_vendor: infrastructure_vendor
+          satellite_managed: true
+        fqdn: my.host.example.com
+        satellite_id: 3f01b55457674041b75e41829bcee1dc
+        ip_addresses:
+        - 10.10.0.1
+        - 10.0.0.2
+        external_id: i-05d2313e6b9a42b16
+        reporter: reporter
+        display_name: host1.mydomain.com
+        facts:
+        - namespace: namespace
+          facts:
+            fact1: value1
+            fact2: value2
+        - namespace: namespace
+          facts:
+            fact1: value1
+            fact2: value2
+        subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
+        ansible_host: host1.mydomain.com
+        insights_id: 3f01b55457674041b75e41829bcee1dc
+        stale_timestamp: 2000-01-23T04:56:07.000+00:00
+        account: "000102"
+        mac_addresses:
+        - c2:00:d0:c8:61:01
+        bios_uuid: 3f01b55457674041b75e41829bcee1dc
+        rhel_machine_id: 3f01b55457674041b75e41829bcee1dc
+      properties:
+        account:
+          description: A Red Hat Account number that owns the host.
+          example: "000102"
+          type: string
+        ansible_host:
+          description: The ansible host name for remediations
+          example: host1.mydomain.com
+          type: string
+        bios_uuid:
+          description: A UUID of the host machine BIOS.  This field is considered
+            to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        display_name:
+          description: A host’s human-readable display name, e.g. in a form of a domain
+            name.
+          example: host1.mydomain.com
+          type: string
+        external_id:
+          description: Host’s reference in the external source e.g. AWS EC2, Azure,
+            OpenStack, etc. This field is considered to be a canonical fact.
+          example: i-05d2313e6b9a42b16
+          type: string
+        facts:
+          description: A set of facts belonging to the host.
+          items:
+            $ref: '#/components/schemas/FactSet'
+          type: array
+        fqdn:
+          description: A host’s Fully Qualified Domain Name.  This field is considered
+            to be a canonical fact.
+          example: my.host.example.com
+          type: string
+        insights_id:
+          description: An ID defined in /etc/insights-client/machine-id. This field
+            is considered a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        ip_addresses:
+          description: Host’s network IP addresses.  This field is considered to be
+            a canonical fact.
+          example:
+          - 10.10.0.1
+          - 10.0.0.2
+          items:
+            type: string
+          type: array
+        mac_addresses:
+          description: Host’s network interfaces MAC addresses.  This field is considered
+            to be a canonical fact.
+          example:
+          - c2:00:d0:c8:61:01
+          items:
+            type: string
+          type: array
+        reporter:
+          description: Reporting source of the host. Used when updating the stale_timestamp.
+          type: string
+        rhel_machine_id:
+          description: A Machine ID of a RHEL host.  This field is considered to be
+            a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        satellite_id:
+          description: A Red Hat Satellite ID of a RHEL host.  This field is considered
+            to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        stale_timestamp:
+          description: Timestamp from which the host is considered stale.
+          format: date-time
+          type: string
+        subscription_manager_id:
+          description: A Red Hat Subcription Manager ID of a RHEL host.  This field
+            is considered to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        system_profile:
+          $ref: '#/components/schemas/SystemProfileIn'
+      required:
+      - account
+      title: Host data
+      type: object
+    CreateHostOut:
+      description: Data of a single host belonging to an account. Represents the hosts
+        without its Inventory metadata.
+      example:
+        fqdn: my.host.example.com
+        satellite_id: 3f01b55457674041b75e41829bcee1dc
+        created: 2000-01-23T04:56:07.000+00:00
+        ip_addresses:
+        - 10.10.0.1
+        - 10.0.0.2
+        external_id: i-05d2313e6b9a42b16
+        reporter: reporter
+        display_name: host1.mydomain.com
+        facts:
+        - namespace: namespace
+          facts:
+            fact1: value1
+            fact2: value2
+        - namespace: namespace
+          facts:
+            fact1: value1
+            fact2: value2
+        tags:
+        - namespace: namespace
+          value: value
+          key: key
+        - namespace: namespace
+          value: value
+          key: key
+        subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
+        ansible_host: host1.mydomain.com
+        culled_timestamp: 2000-01-23T04:56:07.000+00:00
+        insights_id: 3f01b55457674041b75e41829bcee1dc
+        stale_warning_timestamp: 2000-01-23T04:56:07.000+00:00
+        id: 3f01b55457674041b75e41829bcee1dc
+        stale_timestamp: 2000-01-23T04:56:07.000+00:00
+        updated: 2000-01-23T04:56:07.000+00:00
+        account: "000102"
+        mac_addresses:
+        - c2:00:d0:c8:61:01
+        bios_uuid: 3f01b55457674041b75e41829bcee1dc
+        rhel_machine_id: 3f01b55457674041b75e41829bcee1dc
+      properties:
+        account:
+          description: A Red Hat Account number that owns the host.
+          example: "000102"
+          type: string
+        ansible_host:
+          description: The ansible host name for remediations
+          example: host1.mydomain.com
+          nullable: true
+          type: string
+        bios_uuid:
+          description: A UUID of the host machine BIOS.  This field is considered
+            to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          nullable: true
+          type: string
+        created:
+          description: A timestamp when the entry was created.
+          format: date-time
+          type: string
+        culled_timestamp:
+          description: Timestamp from which the host is considered deleted.
+          format: date-time
+          nullable: true
+          type: string
+        display_name:
+          description: A host’s human-readable display name, e.g. in a form of a domain
+            name.
+          example: host1.mydomain.com
+          nullable: true
+          type: string
+        external_id:
+          description: Host’s reference in the external source e.g. AWS EC2, Azure,
+            OpenStack, etc. This field is considered to be a canonical fact.
+          example: i-05d2313e6b9a42b16
+          nullable: true
+          type: string
+        facts:
+          description: A set of facts belonging to the host.
+          items:
+            $ref: '#/components/schemas/FactSet'
+          type: array
+        fqdn:
+          description: A host’s Fully Qualified Domain Name.  This field is considered
+            to be a canonical fact.
+          example: my.host.example.com
+          nullable: true
+          type: string
+        id:
+          description: A durable and reliable platform-wide host identifier. Applications
+            should use this identifier to reference hosts.
+          example: 3f01b55457674041b75e41829bcee1dc
+          type: string
+        insights_id:
+          description: An ID defined in /etc/insights-client/machine-id. This field
+            is considered a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          nullable: true
+          type: string
+        ip_addresses:
+          description: Host’s network IP addresses.  This field is considered to be
+            a canonical fact.
+          example:
+          - 10.10.0.1
+          - 10.0.0.2
+          items:
+            type: string
+          nullable: true
+          type: array
+        mac_addresses:
+          description: Host’s network interfaces MAC addresses.  This field is considered
+            to be a canonical fact.
+          example:
+          - c2:00:d0:c8:61:01
+          items:
+            type: string
+          nullable: true
+          type: array
+        reporter:
+          description: Reporting source of the host. Used when updating the stale_timestamp.
+          nullable: true
+          type: string
+        rhel_machine_id:
+          description: A Machine ID of a RHEL host.  This field is considered to be
+            a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          nullable: true
+          type: string
+        satellite_id:
+          description: A Red Hat Satellite ID of a RHEL host.  This field is considered
+            to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          nullable: true
+          type: string
+        stale_timestamp:
+          description: Timestamp from which the host is considered stale.
+          format: date-time
+          nullable: true
+          type: string
+        stale_warning_timestamp:
+          description: Timestamp from which the host is considered too stale to be
+            listed without an explicit toggle.
+          format: date-time
+          nullable: true
+          type: string
+        subscription_manager_id:
+          description: A Red Hat Subcription Manager ID of a RHEL host.  This field
+            is considered to be a canonical fact.
+          example: 3f01b55457674041b75e41829bcee1dc
+          nullable: true
+          type: string
+        tags:
+          items:
+            $ref: '#/components/schemas/StructuredTag'
+          type: array
+        updated:
+          description: A timestamp when the entry was last updated.
+          format: date-time
+          type: string
+      required:
+      - account
+      title: Create Host Out
+      type: object
+    DiskDevice:
+      description: Representation of one mounted device
+      example:
+        mount_point: /mnt/remote_nfs_shares
+        options: '{"ro":true,"uid":"0"}'
+        label: label
+        type: ext3
+        device: /dev/fdd0
+      properties:
+        device:
+          example: /dev/fdd0
+          type: string
+        label:
+          description: user-defined mount label
+          type: string
+        mount_point:
+          description: mount point
+          example: /mnt/remote_nfs_shares
+          type: string
+        options:
+          $ref: '#/components/schemas/DiskDevice_options'
+        type:
+          description: mount type
+          example: ext3
+          type: string
+      title: Disk Device
+    FactSet:
+      description: A set of string facts belonging to a single namespace.
+      example:
+        namespace: namespace
+        facts:
+          fact1: value1
+          fact2: value2
+      properties:
+        facts:
+          description: The facts themselves.
+          example:
+            fact1: value1
+            fact2: value2
+          type: object
+        namespace:
+          description: A namespace the facts belong to.
+          minLength: 1
+          type: string
+      required:
+      - facts
+      - namespace
+      title: Host facts under a namespace
+    Facts:
+      description: A set of string facts about a host.
+      example:
+        fact1: value1
+        fact2: value2
+      title: Host facts
+      type: object
+    HostOut:
+      allOf:
+      - $ref: '#/components/schemas/CreateHostOut'
+      - $ref: '#/components/schemas/HostOut_allOf'
+      description: A database entry representing a single host with its Inventory
+        metadata.
+      title: A Host Inventory entry
+    HostQueryOutput:
+      description: A paginated host search query result with host entries and their
+        Inventory metadata.
+      example:
+        per_page: 1
+        total: 5
+        count: 0
+        page: 6
+        results:
+        - null
+        - null
+      properties:
+        count:
+          description: A number of entries on the current page.
+          type: integer
+        page:
+          description: A current page number.
+          type: integer
+        per_page:
+          description: A page size – a number of entries per single page.
+          type: integer
+        results:
+          description: Actual host search query result entries.
+          items:
+            $ref: '#/components/schemas/HostOut'
+          type: array
+        total:
+          description: A total count of the found entries.
+          type: integer
+      required:
+      - count
+      - page
+      - per_page
+      - results
+      - total
+      title: A Host Inventory query result
+      type: object
+    HostSystemProfileOut:
+      description: Individual host record that contains only the host id and system
+        profile
+      example:
+        system_profile:
+          insights_egg_version: insights_egg_version
+          yum_repos:
+          - gpgcheck: true
+            baseurl: https://openapi-generator.tech
+            name: name
+            enabled: true
+          - gpgcheck: true
+            baseurl: https://openapi-generator.tech
+            name: name
+            enabled: true
+          installed_products:
+          - name: name
+            id: "71"
+            status: Subscribed
+          - name: name
+            id: "71"
+            status: Subscribed
+          os_release: os_release
+          infrastructure_type: infrastructure_type
+          installed_packages:
+          - 0:krb5-libs-1.16.1-23.fc29.i686
+          - 0:krb5-libs-1.16.1-23.fc29.i686
+          cores_per_socket: 0
+          installed_services:
+          - installed_services
+          - installed_services
+          bios_vendor: bios_vendor
+          number_of_cpus: 1
+          insights_client_version: insights_client_version
+          kernel_modules:
+          - kernel_modules
+          - kernel_modules
+          subscription_status: subscription_status
+          system_memory_bytes: 5
+          katello_agent_running: true
+          enabled_services:
+          - enabled_services
+          - enabled_services
+          last_boot_time: 2000-01-23T04:56:07.000+00:00
+          number_of_sockets: 5
+          running_processes:
+          - running_processes
+          - running_processes
+          bios_release_date: bios_release_date
+          disk_devices:
+          - mount_point: /mnt/remote_nfs_shares
+            options: '{"ro":true,"uid":"0"}'
+            label: label
+            type: ext3
+            device: /dev/fdd0
+          - mount_point: /mnt/remote_nfs_shares
+            options: '{"ro":true,"uid":"0"}'
+            label: label
+            type: ext3
+            device: /dev/fdd0
+          cloud_provider: cloud_provider
+          bios_version: bios_version
+          os_kernel_version: os_kernel_version
+          cpu_flags:
+          - cpu_flags
+          - cpu_flags
+          network_interfaces:
+          - ipv6_addresses:
+            - ipv6_addresses
+            - ipv6_addresses
+            mac_address: 00:00:00:00:00:00
+            name: eth0
+            ipv4_addresses:
+            - ipv4_addresses
+            - ipv4_addresses
+            state: UP
+            type: ether
+            mtu: 6
+          - ipv6_addresses:
+            - ipv6_addresses
+            - ipv6_addresses
+            mac_address: 00:00:00:00:00:00
+            name: eth0
+            ipv4_addresses:
+            - ipv4_addresses
+            - ipv4_addresses
+            state: UP
+            type: ether
+            mtu: 6
+          subscription_auto_attach: subscription_auto_attach
+          arch: arch
+          infrastructure_vendor: infrastructure_vendor
+          satellite_managed: true
+        id: id
+      properties:
+        id:
+          type: string
+        system_profile:
+          $ref: '#/components/schemas/SystemProfileIn'
+      title: Structure of an individual host system profile output
+    InstalledProduct:
+      description: Representation of one installed product
+      example:
+        name: name
+        id: "71"
+        status: Subscribed
+      properties:
+        id:
+          description: the product ID
+          example: "71"
+          type: string
+        name:
+          type: string
+        status:
+          description: subscription status for product
+          example: Subscribed
+          type: string
+      title: Installed Product
+    NetworkInterface:
+      description: Representation of one network interface
+      example:
+        ipv6_addresses:
+        - ipv6_addresses
+        - ipv6_addresses
+        mac_address: 00:00:00:00:00:00
+        name: eth0
+        ipv4_addresses:
+        - ipv4_addresses
+        - ipv4_addresses
+        state: UP
+        type: ether
+        mtu: 6
+      properties:
+        ipv4_addresses:
+          items:
+            format: ipv4
+            type: string
+          type: array
+        ipv6_addresses:
+          items:
+            format: ipv6
+            type: string
+          type: array
+        mac_address:
+          description: MAC address (with or without colons)
+          example: 00:00:00:00:00:00
+          type: string
+        mtu:
+          description: MTU
+          type: integer
+        name:
+          description: name of interface
+          example: eth0
+          type: string
+        state:
+          description: interface state (UP, DOWN, UNKNOWN)
+          example: UP
+          type: string
+        type:
+          description: interface type (ether, loopback)
+          example: ether
+          type: string
+      title: Network Interface
+    PatchHostIn:
+      description: Data of a single host to be updated.
+      example:
+        ansible_host: host1.mydomain.com
+        display_name: host1.mydomain.com
+      properties:
+        ansible_host:
+          description: The ansible host name for remediations
+          example: host1.mydomain.com
+          type: string
+        display_name:
+          description: A host’s human-readable display name, e.g. in a form of a domain
+            name.
+          example: host1.mydomain.com
+          type: string
+      title: Host data
+      type: object
+    StructuredTag:
+      example:
+        namespace: namespace
+        value: value
+        key: key
+      properties:
+        key:
+          type: string
+        namespace:
+          nullable: true
+          type: string
+        value:
+          nullable: true
+          type: string
+      type: object
+    SystemProfileByHostOut:
+      description: Structure of the output of the host system profile query
+      example:
+        per_page: 1
+        total: 5
+        count: 0
+        page: 6
+        results:
+        - system_profile:
+            insights_egg_version: insights_egg_version
+            yum_repos:
+            - gpgcheck: true
+              baseurl: https://openapi-generator.tech
+              name: name
+              enabled: true
+            - gpgcheck: true
+              baseurl: https://openapi-generator.tech
+              name: name
+              enabled: true
+            installed_products:
+            - name: name
+              id: "71"
+              status: Subscribed
+            - name: name
+              id: "71"
+              status: Subscribed
+            os_release: os_release
+            infrastructure_type: infrastructure_type
+            installed_packages:
+            - 0:krb5-libs-1.16.1-23.fc29.i686
+            - 0:krb5-libs-1.16.1-23.fc29.i686
+            cores_per_socket: 0
+            installed_services:
+            - installed_services
+            - installed_services
+            bios_vendor: bios_vendor
+            number_of_cpus: 1
+            insights_client_version: insights_client_version
+            kernel_modules:
+            - kernel_modules
+            - kernel_modules
+            subscription_status: subscription_status
+            system_memory_bytes: 5
+            katello_agent_running: true
+            enabled_services:
+            - enabled_services
+            - enabled_services
+            last_boot_time: 2000-01-23T04:56:07.000+00:00
+            number_of_sockets: 5
+            running_processes:
+            - running_processes
+            - running_processes
+            bios_release_date: bios_release_date
+            disk_devices:
+            - mount_point: /mnt/remote_nfs_shares
+              options: '{"ro":true,"uid":"0"}'
+              label: label
+              type: ext3
+              device: /dev/fdd0
+            - mount_point: /mnt/remote_nfs_shares
+              options: '{"ro":true,"uid":"0"}'
+              label: label
+              type: ext3
+              device: /dev/fdd0
+            cloud_provider: cloud_provider
+            bios_version: bios_version
+            os_kernel_version: os_kernel_version
+            cpu_flags:
+            - cpu_flags
+            - cpu_flags
+            network_interfaces:
+            - ipv6_addresses:
+              - ipv6_addresses
+              - ipv6_addresses
+              mac_address: 00:00:00:00:00:00
+              name: eth0
+              ipv4_addresses:
+              - ipv4_addresses
+              - ipv4_addresses
+              state: UP
+              type: ether
+              mtu: 6
+            - ipv6_addresses:
+              - ipv6_addresses
+              - ipv6_addresses
+              mac_address: 00:00:00:00:00:00
+              name: eth0
+              ipv4_addresses:
+              - ipv4_addresses
+              - ipv4_addresses
+              state: UP
+              type: ether
+              mtu: 6
+            subscription_auto_attach: subscription_auto_attach
+            arch: arch
+            infrastructure_vendor: infrastructure_vendor
+            satellite_managed: true
+          id: id
+        - system_profile:
+            insights_egg_version: insights_egg_version
+            yum_repos:
+            - gpgcheck: true
+              baseurl: https://openapi-generator.tech
+              name: name
+              enabled: true
+            - gpgcheck: true
+              baseurl: https://openapi-generator.tech
+              name: name
+              enabled: true
+            installed_products:
+            - name: name
+              id: "71"
+              status: Subscribed
+            - name: name
+              id: "71"
+              status: Subscribed
+            os_release: os_release
+            infrastructure_type: infrastructure_type
+            installed_packages:
+            - 0:krb5-libs-1.16.1-23.fc29.i686
+            - 0:krb5-libs-1.16.1-23.fc29.i686
+            cores_per_socket: 0
+            installed_services:
+            - installed_services
+            - installed_services
+            bios_vendor: bios_vendor
+            number_of_cpus: 1
+            insights_client_version: insights_client_version
+            kernel_modules:
+            - kernel_modules
+            - kernel_modules
+            subscription_status: subscription_status
+            system_memory_bytes: 5
+            katello_agent_running: true
+            enabled_services:
+            - enabled_services
+            - enabled_services
+            last_boot_time: 2000-01-23T04:56:07.000+00:00
+            number_of_sockets: 5
+            running_processes:
+            - running_processes
+            - running_processes
+            bios_release_date: bios_release_date
+            disk_devices:
+            - mount_point: /mnt/remote_nfs_shares
+              options: '{"ro":true,"uid":"0"}'
+              label: label
+              type: ext3
+              device: /dev/fdd0
+            - mount_point: /mnt/remote_nfs_shares
+              options: '{"ro":true,"uid":"0"}'
+              label: label
+              type: ext3
+              device: /dev/fdd0
+            cloud_provider: cloud_provider
+            bios_version: bios_version
+            os_kernel_version: os_kernel_version
+            cpu_flags:
+            - cpu_flags
+            - cpu_flags
+            network_interfaces:
+            - ipv6_addresses:
+              - ipv6_addresses
+              - ipv6_addresses
+              mac_address: 00:00:00:00:00:00
+              name: eth0
+              ipv4_addresses:
+              - ipv4_addresses
+              - ipv4_addresses
+              state: UP
+              type: ether
+              mtu: 6
+            - ipv6_addresses:
+              - ipv6_addresses
+              - ipv6_addresses
+              mac_address: 00:00:00:00:00:00
+              name: eth0
+              ipv4_addresses:
+              - ipv4_addresses
+              - ipv4_addresses
+              state: UP
+              type: ether
+              mtu: 6
+            subscription_auto_attach: subscription_auto_attach
+            arch: arch
+            infrastructure_vendor: infrastructure_vendor
+            satellite_managed: true
+          id: id
+      properties:
+        count:
+          description: A number of entries on the current page.
+          type: integer
+        page:
+          description: A current page number.
+          type: integer
+        per_page:
+          description: A page size – a number of entries per single page.
+          type: integer
+        results:
+          description: Actual host search query result entries.
+          items:
+            $ref: '#/components/schemas/HostSystemProfileOut'
+          type: array
+        total:
+          description: A total count of the found entries.
+          type: integer
+      required:
+      - count
+      - page
+      - per_page
+      - results
+      - total
+      title: A host system profile query result
+      type: object
+    SystemProfileIn:
+      description: Representation of the system profile fields
+      example:
+        insights_egg_version: insights_egg_version
+        yum_repos:
+        - gpgcheck: true
+          baseurl: https://openapi-generator.tech
+          name: name
+          enabled: true
+        - gpgcheck: true
+          baseurl: https://openapi-generator.tech
+          name: name
+          enabled: true
+        installed_products:
+        - name: name
+          id: "71"
+          status: Subscribed
+        - name: name
+          id: "71"
+          status: Subscribed
+        os_release: os_release
+        infrastructure_type: infrastructure_type
+        installed_packages:
+        - 0:krb5-libs-1.16.1-23.fc29.i686
+        - 0:krb5-libs-1.16.1-23.fc29.i686
+        cores_per_socket: 0
+        installed_services:
+        - installed_services
+        - installed_services
+        bios_vendor: bios_vendor
+        number_of_cpus: 1
+        insights_client_version: insights_client_version
+        kernel_modules:
+        - kernel_modules
+        - kernel_modules
+        subscription_status: subscription_status
+        system_memory_bytes: 5
+        katello_agent_running: true
+        enabled_services:
+        - enabled_services
+        - enabled_services
+        last_boot_time: 2000-01-23T04:56:07.000+00:00
+        number_of_sockets: 5
+        running_processes:
+        - running_processes
+        - running_processes
+        bios_release_date: bios_release_date
+        disk_devices:
+        - mount_point: /mnt/remote_nfs_shares
+          options: '{"ro":true,"uid":"0"}'
+          label: label
+          type: ext3
+          device: /dev/fdd0
+        - mount_point: /mnt/remote_nfs_shares
+          options: '{"ro":true,"uid":"0"}'
+          label: label
+          type: ext3
+          device: /dev/fdd0
+        cloud_provider: cloud_provider
+        bios_version: bios_version
+        os_kernel_version: os_kernel_version
+        cpu_flags:
+        - cpu_flags
+        - cpu_flags
+        network_interfaces:
+        - ipv6_addresses:
+          - ipv6_addresses
+          - ipv6_addresses
+          mac_address: 00:00:00:00:00:00
+          name: eth0
+          ipv4_addresses:
+          - ipv4_addresses
+          - ipv4_addresses
+          state: UP
+          type: ether
+          mtu: 6
+        - ipv6_addresses:
+          - ipv6_addresses
+          - ipv6_addresses
+          mac_address: 00:00:00:00:00:00
+          name: eth0
+          ipv4_addresses:
+          - ipv4_addresses
+          - ipv4_addresses
+          state: UP
+          type: ether
+          mtu: 6
+        subscription_auto_attach: subscription_auto_attach
+        arch: arch
+        infrastructure_vendor: infrastructure_vendor
+        satellite_managed: true
+      properties:
+        arch:
+          type: string
+        bios_release_date:
+          type: string
+        bios_vendor:
+          type: string
+        bios_version:
+          type: string
+        cloud_provider:
+          type: string
+        cores_per_socket:
+          type: integer
+        cpu_flags:
+          items:
+            type: string
+          type: array
+        disk_devices:
+          items:
+            $ref: '#/components/schemas/DiskDevice'
+          type: array
+        enabled_services:
+          items:
+            type: string
+          type: array
+        infrastructure_type:
+          type: string
+        infrastructure_vendor:
+          type: string
+        insights_client_version:
+          type: string
+        insights_egg_version:
+          type: string
+        installed_packages:
+          items:
+            description: a NEVRA string for a single installed package
+            example: 0:krb5-libs-1.16.1-23.fc29.i686
+            type: string
+          type: array
+        installed_products:
+          items:
+            $ref: '#/components/schemas/InstalledProduct'
+          type: array
+        installed_services:
+          items:
+            type: string
+          type: array
+        katello_agent_running:
+          type: boolean
+        kernel_modules:
+          items:
+            type: string
+          type: array
+        last_boot_time:
+          format: date-time
+          type: string
+        network_interfaces:
+          items:
+            $ref: '#/components/schemas/NetworkInterface'
+          type: array
+        number_of_cpus:
+          type: integer
+        number_of_sockets:
+          type: integer
+        os_kernel_version:
+          type: string
+        os_release:
+          type: string
+        running_processes:
+          items:
+            description: a single running process. This will be truncated to 1000
+              characters when saved.
+            type: string
+          type: array
+        satellite_managed:
+          type: boolean
+        subscription_auto_attach:
+          type: string
+        subscription_status:
+          type: string
+        system_memory_bytes:
+          type: integer
+        yum_repos:
+          items:
+            $ref: '#/components/schemas/YumRepo'
+          type: array
+      title: System profile fields
+      type: object
+    TagCountOut:
+      example:
+        per_page: 1
+        total: 5
+        count: 0
+        page: 6
+        results:
+          key: 5
+      properties:
+        count:
+          description: A number of entries on the current page.
+          type: integer
+        page:
+          description: A current page number.
+          type: integer
+        per_page:
+          description: A page size – a number of entries per single page.
+          type: integer
+        results:
+          additionalProperties:
+            type: integer
+          description: The list of tags on the systems
+          type: object
+        total:
+          description: Total number of items in the "data" list.
+          type: integer
+      type: object
+    TagsOut:
+      example:
+        per_page: 1
+        total: 5
+        count: 0
+        page: 6
+        results:
+          key:
+          - namespace: namespace
+            value: value
+            key: key
+          - namespace: namespace
+            value: value
+            key: key
+      properties:
+        count:
+          description: A number of entries on the current page.
+          type: integer
+        page:
+          description: A current page number.
+          type: integer
+        per_page:
+          description: A page size – a number of entries per single page.
+          type: integer
+        results:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/StructuredTag'
+            type: array
+          description: The list of tags on the systems
+          type: object
+        total:
+          description: Total number of items in the "data" list.
+          type: integer
+      type: object
+    YumRepo:
+      description: Representation of one yum repository
+      example:
+        gpgcheck: true
+        baseurl: https://openapi-generator.tech
+        name: name
+        enabled: true
+      properties:
+        baseurl:
+          format: uri
+          type: string
+        enabled:
+          type: boolean
+        gpgcheck:
+          type: boolean
+        name:
+          type: string
+      title: Yum Repository
+    DiskDevice_options:
+      description: mount options
+      example: '{"ro":true,"uid":"0"}'
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    HostOut_allOf:
+      properties:
+        facts:
+          description: A set of facts belonging to the host.
+          items:
+            $ref: '#/components/schemas/FactSet'
+          type: array
+  securitySchemes:
+    ApiKeyAuth:
+      description: 'Base64-encoded JSON identity header provided by 3Scale. Contains
+        an account number of the user issuing the request. Format of the JSON: {"identity":
+        {"account_number": "12345678"}}'
+      in: header
+      name: x-rh-identity
+      type: apiKey
+      x-apikeyInfoFunc: app.auth.authentication_header_handler
+    BearerAuth:
+      scheme: bearer
+      type: http
+      x-bearerInfoFunc: app.auth.bearer_token_handler
