@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **CoresPerSocket** | **int32** |  | [optional] 
 **CpuFlags** | **[]string** |  | [optional] 
 **DiskDevices** | [**[]DiskDevice**](DiskDevice.md) |  | [optional] 
+**DnfModules** | [**[]DnfModule**](DnfModule.md) |  | [optional] 
 **EnabledServices** | **[]string** |  | [optional] 
 **InfrastructureType** | **string** |  | [optional] 
 **InfrastructureVendor** | **string** |  | [optional] 

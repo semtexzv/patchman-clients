@@ -223,7 +223,6 @@ type ApiHostGetHostByIdOpts struct {
     Page optional.Int32
     OrderBy optional.String
     OrderHow optional.String
-    Staleness optional.Interface
 }
 
 /*
@@ -237,7 +236,6 @@ Find one or more hosts by their ID.
  * @param "Page" (optional.Int32) -  A page number of the items to return.
  * @param "OrderBy" (optional.String) -  Ordering field name
  * @param "OrderHow" (optional.String) -  Direction of the ordering, defaults to ASC for display_name and to DESC for updated
- * @param "Staleness" (optional.Interface of []string) -  Culling states of the hosts. Default: fresh,stale,unknown
 @return HostQueryOutput
 */
 func (a *HostsApiService) ApiHostGetHostById(ctx _context.Context, hostIdList []string, localVarOptionals *ApiHostGetHostByIdOpts) (HostQueryOutput, *_nethttp.Response, error) {
@@ -272,17 +270,6 @@ func (a *HostsApiService) ApiHostGetHostById(ctx _context.Context, hostIdList []
 	}
 	if localVarOptionals != nil && localVarOptionals.OrderHow.IsSet() {
 		localVarQueryParams.Add("order_how", parameterToString(localVarOptionals.OrderHow.Value(), ""))
-	}
-	if localVarOptionals != nil && localVarOptionals.Staleness.IsSet() {
-		t:=localVarOptionals.Staleness.Value()
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				localVarQueryParams.Add("staleness", parameterToString(s.Index(i), "multi"))
-			}
-		} else {
-			localVarQueryParams.Add("staleness", parameterToString(t, "multi"))
-		}
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

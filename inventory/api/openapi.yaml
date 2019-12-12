@@ -286,25 +286,6 @@ paths:
           - DESC
           type: string
         style: form
-      - description: 'Culling states of the hosts. Default: fresh,stale,unknown'
-        explode: true
-        in: query
-        name: staleness
-        required: false
-        schema:
-          default:
-          - fresh
-          - stale
-          - unknown
-          items:
-            enum:
-            - fresh
-            - stale
-            - stale_warning
-            - unknown
-            type: string
-          type: array
-        style: form
       responses:
         200:
           content:
@@ -963,14 +944,21 @@ components:
       example:
         system_profile:
           insights_egg_version: insights_egg_version
+          dnf_modules:
+          - stream: stream
+            name: name
+          - stream: stream
+            name: name
           yum_repos:
           - gpgcheck: true
             baseurl: https://openapi-generator.tech
             name: name
+            id: id
             enabled: true
           - gpgcheck: true
             baseurl: https://openapi-generator.tech
             name: name
+            id: id
             enabled: true
           installed_products:
           - name: name
@@ -982,8 +970,8 @@ components:
           os_release: os_release
           infrastructure_type: infrastructure_type
           installed_packages:
-          - 0:krb5-libs-1.16.1-23.fc29.i686
-          - 0:krb5-libs-1.16.1-23.fc29.i686
+          - krb5-libs-0:-1.16.1-23.fc29.i686
+          - krb5-libs-0:-1.16.1-23.fc29.i686
           cores_per_socket: 0
           installed_services:
           - installed_services
@@ -1067,6 +1055,13 @@ components:
           facts:
             fact1: value1
             fact2: value2
+        tags:
+        - namespace: namespace
+          value: value
+          key: key
+        - namespace: namespace
+          value: value
+          key: key
         subscription_manager_id: 3f01b55457674041b75e41829bcee1dc
         ansible_host: host1.mydomain.com
         insights_id: 3f01b55457674041b75e41829bcee1dc
@@ -1156,6 +1151,11 @@ components:
           type: string
         system_profile:
           $ref: '#/components/schemas/SystemProfileIn'
+        tags:
+          description: The tags on a host
+          items:
+            $ref: '#/components/schemas/StructuredTag'
+          type: array
       required:
       - account
       title: Host data
@@ -1314,6 +1314,7 @@ components:
           nullable: true
           type: string
         tags:
+          description: An array of the tags on the host
           items:
             $ref: '#/components/schemas/StructuredTag'
           type: array
@@ -1351,6 +1352,17 @@ components:
           example: ext3
           type: string
       title: Disk Device
+    DnfModule:
+      description: Representation of one DNF module
+      example:
+        stream: stream
+        name: name
+      properties:
+        name:
+          type: string
+        stream:
+          type: string
+      title: DNF Module
     FactSet:
       description: A set of string facts belonging to a single namespace.
       example:
@@ -1430,14 +1442,21 @@ components:
       example:
         system_profile:
           insights_egg_version: insights_egg_version
+          dnf_modules:
+          - stream: stream
+            name: name
+          - stream: stream
+            name: name
           yum_repos:
           - gpgcheck: true
             baseurl: https://openapi-generator.tech
             name: name
+            id: id
             enabled: true
           - gpgcheck: true
             baseurl: https://openapi-generator.tech
             name: name
+            id: id
             enabled: true
           installed_products:
           - name: name
@@ -1449,8 +1468,8 @@ components:
           os_release: os_release
           infrastructure_type: infrastructure_type
           installed_packages:
-          - 0:krb5-libs-1.16.1-23.fc29.i686
-          - 0:krb5-libs-1.16.1-23.fc29.i686
+          - krb5-libs-0:-1.16.1-23.fc29.i686
+          - krb5-libs-0:-1.16.1-23.fc29.i686
           cores_per_socket: 0
           installed_services:
           - installed_services
@@ -1629,14 +1648,21 @@ components:
         results:
         - system_profile:
             insights_egg_version: insights_egg_version
+            dnf_modules:
+            - stream: stream
+              name: name
+            - stream: stream
+              name: name
             yum_repos:
             - gpgcheck: true
               baseurl: https://openapi-generator.tech
               name: name
+              id: id
               enabled: true
             - gpgcheck: true
               baseurl: https://openapi-generator.tech
               name: name
+              id: id
               enabled: true
             installed_products:
             - name: name
@@ -1648,8 +1674,8 @@ components:
             os_release: os_release
             infrastructure_type: infrastructure_type
             installed_packages:
-            - 0:krb5-libs-1.16.1-23.fc29.i686
-            - 0:krb5-libs-1.16.1-23.fc29.i686
+            - krb5-libs-0:-1.16.1-23.fc29.i686
+            - krb5-libs-0:-1.16.1-23.fc29.i686
             cores_per_socket: 0
             installed_services:
             - installed_services
@@ -1719,14 +1745,21 @@ components:
           id: id
         - system_profile:
             insights_egg_version: insights_egg_version
+            dnf_modules:
+            - stream: stream
+              name: name
+            - stream: stream
+              name: name
             yum_repos:
             - gpgcheck: true
               baseurl: https://openapi-generator.tech
               name: name
+              id: id
               enabled: true
             - gpgcheck: true
               baseurl: https://openapi-generator.tech
               name: name
+              id: id
               enabled: true
             installed_products:
             - name: name
@@ -1738,8 +1771,8 @@ components:
             os_release: os_release
             infrastructure_type: infrastructure_type
             installed_packages:
-            - 0:krb5-libs-1.16.1-23.fc29.i686
-            - 0:krb5-libs-1.16.1-23.fc29.i686
+            - krb5-libs-0:-1.16.1-23.fc29.i686
+            - krb5-libs-0:-1.16.1-23.fc29.i686
             cores_per_socket: 0
             installed_services:
             - installed_services
@@ -1837,14 +1870,21 @@ components:
       description: Representation of the system profile fields
       example:
         insights_egg_version: insights_egg_version
+        dnf_modules:
+        - stream: stream
+          name: name
+        - stream: stream
+          name: name
         yum_repos:
         - gpgcheck: true
           baseurl: https://openapi-generator.tech
           name: name
+          id: id
           enabled: true
         - gpgcheck: true
           baseurl: https://openapi-generator.tech
           name: name
+          id: id
           enabled: true
         installed_products:
         - name: name
@@ -1856,8 +1896,8 @@ components:
         os_release: os_release
         infrastructure_type: infrastructure_type
         installed_packages:
-        - 0:krb5-libs-1.16.1-23.fc29.i686
-        - 0:krb5-libs-1.16.1-23.fc29.i686
+        - krb5-libs-0:-1.16.1-23.fc29.i686
+        - krb5-libs-0:-1.16.1-23.fc29.i686
         cores_per_socket: 0
         installed_services:
         - installed_services
@@ -1945,6 +1985,10 @@ components:
           items:
             $ref: '#/components/schemas/DiskDevice'
           type: array
+        dnf_modules:
+          items:
+            $ref: '#/components/schemas/DnfModule'
+          type: array
         enabled_services:
           items:
             type: string
@@ -1960,7 +2004,7 @@ components:
         installed_packages:
           items:
             description: a NEVRA string for a single installed package
-            example: 0:krb5-libs-1.16.1-23.fc29.i686
+            example: krb5-libs-0:-1.16.1-23.fc29.i686
             type: string
           type: array
         installed_products:
@@ -2080,6 +2124,7 @@ components:
         gpgcheck: true
         baseurl: https://openapi-generator.tech
         name: name
+        id: id
         enabled: true
       properties:
         baseurl:
@@ -2089,6 +2134,8 @@ components:
           type: boolean
         gpgcheck:
           type: boolean
+        id:
+          type: string
         name:
           type: string
       title: Yum Repository

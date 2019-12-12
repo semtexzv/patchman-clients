@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **PackageList** | **[]string** |  | 
 **RepositoryList** | **[]string** |  | [optional] 
-**ModulesList** | [**[]UpdatesResponseModulesList**](UpdatesResponse_modules_list.md) |  | [optional] 
+**ModulesList** | [**[]UpdatesRequestModulesList**](UpdatesRequest_modules_list.md) |  | [optional] 
 **Releasever** | **string** |  | [optional] 
 **Basearch** | **string** |  | [optional] 
 

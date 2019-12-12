@@ -52,6 +52,7 @@ Class | Method | HTTP request | Description
  - [CreateHostOut](docs/CreateHostOut.md)
  - [DiskDevice](docs/DiskDevice.md)
  - [DiskDeviceOptions](docs/DiskDeviceOptions.md)
+ - [DnfModule](docs/DnfModule.md)
  - [FactSet](docs/FactSet.md)
  - [HostOut](docs/HostOut.md)
  - [HostOutAllOf](docs/HostOutAllOf.md)

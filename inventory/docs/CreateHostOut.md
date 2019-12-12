@@ -23,7 +23,7 @@ Name | Type | Description | Notes
 **StaleTimestamp** | Pointer to **string** | Timestamp from which the host is considered stale. | [optional] 
 **StaleWarningTimestamp** | Pointer to **string** | Timestamp from which the host is considered too stale to be listed without an explicit toggle. | [optional] 
 **SubscriptionManagerId** | Pointer to **string** | A Red Hat Subcription Manager ID of a RHEL host.  This field is considered to be a canonical fact. | [optional] 
-**Tags** | [**[]StructuredTag**](StructuredTag.md) |  | [optional] 
+**Tags** | [**[]StructuredTag**](StructuredTag.md) | An array of the tags on the host | [optional] 
 **Updated** | **string** | A timestamp when the entry was last updated. | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

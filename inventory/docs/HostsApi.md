@@ -126,7 +126,6 @@ Name | Type | Description  | Notes
  **page** | **optional.Int32**| A page number of the items to return. | [default to 1]
  **orderBy** | **optional.String**| Ordering field name | 
  **orderHow** | **optional.String**| Direction of the ordering, defaults to ASC for display_name and to DESC for updated | 
- **staleness** | [**optional.Interface of []string**](string.md)| Culling states of the hosts. Default: fresh,stale,unknown | [default to [&quot;fresh&quot;,&quot;stale&quot;,&quot;unknown&quot;]]
 
 ### Return type
 

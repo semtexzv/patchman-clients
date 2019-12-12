@@ -41,4 +41,6 @@ type CreateHostIn struct {
 	// A Red Hat Subcription Manager ID of a RHEL host.  This field is considered to be a canonical fact.
 	SubscriptionManagerId string `json:"subscription_manager_id,omitempty"`
 	SystemProfile SystemProfileIn `json:"system_profile,omitempty"`
+	// The tags on a host
+	Tags []StructuredTag `json:"tags,omitempty"`
 }

@@ -48,6 +48,7 @@ type HostOut struct {
 	StaleWarningTimestamp *string `json:"stale_warning_timestamp,omitempty"`
 	// A Red Hat Subcription Manager ID of a RHEL host.  This field is considered to be a canonical fact.
 	SubscriptionManagerId *string `json:"subscription_manager_id,omitempty"`
+	// An array of the tags on the host
 	Tags []StructuredTag `json:"tags,omitempty"`
 	// A timestamp when the entry was last updated.
 	Updated string `json:"updated,omitempty"`

@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **StaleTimestamp** | **string** | Timestamp from which the host is considered stale. | [optional] 
 **SubscriptionManagerId** | **string** | A Red Hat Subcription Manager ID of a RHEL host.  This field is considered to be a canonical fact. | [optional] 
 **SystemProfile** | [**SystemProfileIn**](SystemProfileIn.md) |  | [optional] 
+**Tags** | [**[]StructuredTag**](StructuredTag.md) | The tags on a host | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

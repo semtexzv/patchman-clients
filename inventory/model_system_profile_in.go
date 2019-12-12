@@ -18,6 +18,7 @@ type SystemProfileIn struct {
 	CoresPerSocket int32 `json:"cores_per_socket,omitempty"`
 	CpuFlags []string `json:"cpu_flags,omitempty"`
 	DiskDevices []DiskDevice `json:"disk_devices,omitempty"`
+	DnfModules []DnfModule `json:"dnf_modules,omitempty"`
 	EnabledServices []string `json:"enabled_services,omitempty"`
 	InfrastructureType string `json:"infrastructure_type,omitempty"`
 	InfrastructureVendor string `json:"infrastructure_vendor,omitempty"`

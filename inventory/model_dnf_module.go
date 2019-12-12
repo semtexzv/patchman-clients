@@ -8,11 +8,8 @@
  */
 
 package inventory
-// YumRepo Representation of one yum repository
-type YumRepo struct {
-	Baseurl string `json:"baseurl,omitempty"`
-	Enabled bool `json:"enabled,omitempty"`
-	Gpgcheck bool `json:"gpgcheck,omitempty"`
-	Id string `json:"id,omitempty"`
+// DnfModule Representation of one DNF module
+type DnfModule struct {
 	Name string `json:"name,omitempty"`
+	Stream string `json:"stream,omitempty"`
 }
